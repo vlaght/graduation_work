@@ -41,7 +41,7 @@ func (NoiseSuite) TestN(c *C) {
 }
 
 func (NoiseSuite) TestX(c *C) {
-	cs := NewCipherSuite(DH25519, CipherChaChaPoly, HashSHA256)
+	cs := NewCipherSuite(DH25519, CipherKuznechik, HashStribog256)
 	rng := new(RandomInc)
 	staticI, _ := cs.GenerateKeypair(rng)
 	staticR, _ := cs.GenerateKeypair(rng)
@@ -55,12 +55,12 @@ func (NoiseSuite) TestX(c *C) {
 	})
 
 	hello, _, _, _ := hs.WriteMessage(nil, nil)
-	expected, _ := hex.DecodeString("79a631eede1bf9c98f12032cdeadd0e7a079398fc786b88cc846ec89af85a51ad203cd28d81cf65a2da637f557a05728b3ae4abdc3a42d1cda5f719d6cf41d7f2cf1b1c5af10e38a09a9bb7e3b1d589a99492cc50293eaa1f3f391b59bb6990d")
+	expected, _ := hex.DecodeString("79a631eede1bf9c98f12032cdeadd0e7a079398fc786b88cc846ec89af85a51a9442fb949290cc2bc347f717c9c224ff7d7860e932a71edc4d5a196eb680674c240f8723d0d528d439582d7b292002a1b16835ba4f27400fbea71888412bea95")
 	c.Assert(hello, DeepEquals, expected)
 }
 
 func (NoiseSuite) TestNN(c *C) {
-	cs := NewCipherSuite(DH25519, CipherAESGCM, HashSHA512)
+	cs := NewCipherSuite(DH25519, CipherKuznechik, HashStribog256)
 	rngI := new(RandomInc)
 	rngR := new(RandomInc)
 	*rngR = 1
@@ -90,12 +90,12 @@ func (NoiseSuite) TestNN(c *C) {
 	c.Assert(err, IsNil)
 	c.Assert(string(res), Equals, "defg")
 
-	expected, _ := hex.DecodeString("07a37cbc142093c8b755dc1b10e86cb426374ad16aa853ed0bdfc0b2b86d1c7c5e4dc9545d41b3280f4586a5481829e1e24ec5a0")
+	expected, _ := hex.DecodeString("07a37cbc142093c8b755dc1b10e86cb426374ad16aa853ed0bdfc0b2b86d1c7c3024aedc8e58d5b9ade9042ef4eaf62be61e88f7")
 	c.Assert(msg, DeepEquals, expected)
 }
 
 func (NoiseSuite) TestXX(c *C) {
-	cs := NewCipherSuite(DH25519, CipherAESGCM, HashSHA256)
+	cs := NewCipherSuite(DH25519, CipherKuznechik, HashStribog256)
 	rngI := new(RandomInc)
 	rngR := new(RandomInc)
 	*rngR = 1
@@ -135,12 +135,12 @@ func (NoiseSuite) TestXX(c *C) {
 	c.Assert(err, IsNil)
 	c.Assert(res, HasLen, 0)
 
-	expected, _ := hex.DecodeString("8127f4b35cdbdf0935fcf1ec99016d1dcbc350055b8af360be196905dfb50a2c1c38a7ca9cb0cfe8f4576f36c47a4933eee32288f590ac4305d4b53187577be7")
+	expected, _ := hex.DecodeString("aa035e8112ce1aef09a2fc68fd0167a21ebd295957a8e46b197199747d7939143796e8f0fc72d456ebb4a2a1ea46c82ca1c3fdf358b69ec73dab9a1ae7fca5b3")
 	c.Assert(msg, DeepEquals, expected)
 }
 
 func (NoiseSuite) TestIK(c *C) {
-	cs := NewCipherSuite(DH25519, CipherAESGCM, HashSHA256)
+	cs := NewCipherSuite(DH25519, CipherKuznechik, HashStribog256)
 	rngI := new(RandomInc)
 	rngR := new(RandomInc)
 	*rngR = 1
@@ -177,7 +177,7 @@ func (NoiseSuite) TestIK(c *C) {
 	c.Assert(err, IsNil)
 	c.Assert(string(res), Equals, "defg")
 
-	expected, _ := hex.DecodeString("5869aff450549732cbaaed5e5df9b30a6da31cb0e5742bad5ad4a1a768f1a67b7555a94199d0ce2972e0861b06c2152419a278de")
+	expected, _ := hex.DecodeString("5869aff450549732cbaaed5e5df9b30a6da31cb0e5742bad5ad4a1a768f1a67b2aeb69aaafd31cc13efe70ee9278a82dbed77ee1")
 	c.Assert(msg, DeepEquals, expected)
 }
 
@@ -246,7 +246,7 @@ func (NoiseSuite) TestXXRoundtrip(c *C) {
 }
 
 func (NoiseSuite) Test_NNpsk0_Roundtrip(c *C) {
-	cs := NewCipherSuite(DH25519, CipherChaChaPoly, HashBLAKE2b)
+	cs := NewCipherSuite(DH25519, CipherKuznechik, HashStribog256)
 	rngI := new(RandomInc)
 	rngR := new(RandomInc)
 	*rngR = 1
@@ -293,7 +293,7 @@ func (NoiseSuite) Test_NNpsk0_Roundtrip(c *C) {
 }
 
 func (NoiseSuite) Test_Npsk0(c *C) {
-	cs := NewCipherSuite(DH25519, CipherAESGCM, HashSHA256)
+	cs := NewCipherSuite(DH25519, CipherKuznechik, HashStribog256)
 	rng := new(RandomInc)
 	staticR, _ := cs.GenerateKeypair(rng)
 
@@ -308,13 +308,13 @@ func (NoiseSuite) Test_Npsk0(c *C) {
 
 	msg, _, _, _ := hsI.WriteMessage(nil, nil)
 	c.Assert(msg, HasLen, 48)
-
-	expected, _ := hex.DecodeString("358072d6365880d1aeea329adf9121383851ed21a28e3b75e965d0d2cd1662542044ae563929068930dcf04674526cb9")
+	
+	expected, _ := hex.DecodeString("358072d6365880d1aeea329adf9121383851ed21a28e3b75e965d0d2cd1662543cff577e31f7a9e2ffcfcfd5c6006bb1")
 	c.Assert(msg, DeepEquals, expected)
 }
 
 func (NoiseSuite) Test_Xpsk0(c *C) {
-	cs := NewCipherSuite(DH25519, CipherChaChaPoly, HashSHA256)
+	cs := NewCipherSuite(DH25519, CipherKuznechik, HashStribog256)
 	rng := new(RandomInc)
 	staticI, _ := cs.GenerateKeypair(rng)
 	staticR, _ := cs.GenerateKeypair(rng)
@@ -331,12 +331,12 @@ func (NoiseSuite) Test_Xpsk0(c *C) {
 	msg, _, _, _ := hs.WriteMessage(nil, nil)
 	c.Assert(msg, HasLen, 96)
 
-	expected, _ := hex.DecodeString("79a631eede1bf9c98f12032cdeadd0e7a079398fc786b88cc846ec89af85a51ad51eef529db0dd9127d4aa59a9183e118337d75a4e55e7e00f85c3d20ede536dd0112eec8c3b2a514018a90ab685b027dd24aa0c70b0c0f00524cc23785028b9")
+	expected, _ := hex.DecodeString("79a631eede1bf9c98f12032cdeadd0e7a079398fc786b88cc846ec89af85a51a228d04f423f0f9ba2cb264c6a8823b2a0b57fba746f740f200190d77cd0479019ede95c14e07dd9ee3af700165c2ab07de52316a08e88142e529fb7f82428ba5")
 	c.Assert(msg, DeepEquals, expected)
 }
 
 func (NoiseSuite) Test_NNpsk0(c *C) {
-	cs := NewCipherSuite(DH25519, CipherAESGCM, HashSHA512)
+	cs := NewCipherSuite(DH25519, CipherKuznechik, HashStribog256)
 	rngI := new(RandomInc)
 	rngR := new(RandomInc)
 	*rngR = 1
@@ -371,12 +371,12 @@ func (NoiseSuite) Test_NNpsk0(c *C) {
 	c.Assert(err, IsNil)
 	c.Assert(string(res), Equals, "defg")
 
-	expected, _ := hex.DecodeString("07a37cbc142093c8b755dc1b10e86cb426374ad16aa853ed0bdfc0b2b86d1c7c3e42e140cfffbcdf5d9d2a1c24ce4cdbdf1eaf37")
+	expected, _ := hex.DecodeString("07a37cbc142093c8b755dc1b10e86cb426374ad16aa853ed0bdfc0b2b86d1c7c0b4cb5be4c213b386e3f91e709a011e0aa8229bf")
 	c.Assert(msg, DeepEquals, expected)
 }
 
 func (NoiseSuite) Test_XXpsk0(c *C) {
-	cs := NewCipherSuite(DH25519, CipherAESGCM, HashSHA256)
+	cs := NewCipherSuite(DH25519, CipherKuznechik, HashStribog256)
 	rngI := new(RandomInc)
 	rngR := new(RandomInc)
 	*rngR = 1
@@ -422,12 +422,12 @@ func (NoiseSuite) Test_XXpsk0(c *C) {
 	c.Assert(err, IsNil)
 	c.Assert(res, HasLen, 0)
 
-	expected, _ := hex.DecodeString("1b6d7cc3b13bd02217f9cdb98c50870db96281193dca4df570bf6230a603b686fd90d2914c7e797d9276ef8fb34b0c9d87faa048ce4bc7e7af21b6a450352275")
+	expected, _ := hex.DecodeString("9a89933d88009ec3eb1abce97ee0a6dc2c657dadb9986b09953af4116a3fe72fd2d165da3b7436cbdd9fd4e4dc3861177a0444081dc30941500494928e0b4f28")
 	c.Assert(msg, DeepEquals, expected)
 }
 
 func (NoiseSuite) TestHandshakeRollback(c *C) {
-	cs := NewCipherSuite(DH25519, CipherAESGCM, HashSHA512)
+	cs := NewCipherSuite(DH25519, CipherKuznechik, HashStribog256)
 	rngI := new(RandomInc)
 	rngR := new(RandomInc)
 	*rngR = 1
@@ -461,7 +461,7 @@ func (NoiseSuite) TestHandshakeRollback(c *C) {
 	res, _, _, err = hsI.ReadMessage(nil, msg)
 	c.Assert(string(res), Equals, "defg")
 
-	expected, _ := hex.DecodeString("07a37cbc142093c8b755dc1b10e86cb426374ad16aa853ed0bdfc0b2b86d1c7c5e4dc9545d41b3280f4586a5481829e1e24ec5a0")
+	expected, _ := hex.DecodeString("07a37cbc142093c8b755dc1b10e86cb426374ad16aa853ed0bdfc0b2b86d1c7c3024aedc8e58d5b9ade9042ef4eaf62be61e88f7")
 	c.Assert(msg, DeepEquals, expected)
 }
 
@@ -470,7 +470,7 @@ func (NoiseSuite) TestRekey(c *C) {
 
 	clientStaticKeypair, _ := DH25519.GenerateKeypair(rng)
 	clientConfig := Config{}
-	clientConfig.CipherSuite = NewCipherSuite(DH25519, CipherChaChaPoly, HashBLAKE2b)
+	clientConfig.CipherSuite = NewCipherSuite(DH25519, CipherKuznechik, HashStribog256)
 	clientConfig.Random = rng
 	clientConfig.Pattern = HandshakeNN
 	clientConfig.Initiator = true
@@ -481,7 +481,7 @@ func (NoiseSuite) TestRekey(c *C) {
 
 	serverStaticKeypair, _ := DH25519.GenerateKeypair(rng)
 	serverConfig := Config{}
-	serverConfig.CipherSuite = NewCipherSuite(DH25519, CipherChaChaPoly, HashBLAKE2b)
+	serverConfig.CipherSuite = NewCipherSuite(DH25519, CipherKuznechik, HashStribog256)
 	serverConfig.Random = rng
 	serverConfig.Pattern = HandshakeNN
 	serverConfig.Initiator = false
