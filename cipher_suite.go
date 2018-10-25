@@ -16,6 +16,8 @@ import (
 	"golang.org/x/crypto/curve25519"
 
 	"cypherpunks.ru/gogost/gost34112012"
+
+	"kuznechik"
 )
 
 // A DHKey is a keypair used for Diffie-Hellman key agreement.
@@ -158,6 +160,30 @@ func cipherAESGCM(k [32]byte) Cipher {
 		},
 	}
 }
+
+// CipherKuznechik is the Kuznechik-GCM AEAD cipher.
+var CipherKuznechik CipherFunc = cipherFn{Gost34122015, "KuznechikGCM"}
+
+func Gost34122015(k [32]byte) Cipher {
+	c, err := kuznechik.NewCipher(k[:])
+	if err != nil {
+		panic(err)
+	}
+	gcm, err := cipher.NewGCM(c)
+	if err != nil {
+		panic(err)
+	}
+	return aeadCipher{
+		gcm,
+		func(n uint64) []byte {
+			var nonce [12]byte
+			binary.BigEndian.PutUint64(nonce[4:], n)
+			return nonce[:]
+		},
+	}
+}
+
+
 
 // CipherChaChaPoly is the ChaCha20-Poly1305 AEAD cipher construction.
 var CipherChaChaPoly CipherFunc = cipherFn{cipherChaChaPoly, "ChaChaPoly"}

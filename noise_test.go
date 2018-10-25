@@ -24,7 +24,7 @@ func (r *RandomInc) Read(p []byte) (int, error) {
 }
 
 func (NoiseSuite) TestN(c *C) {
-	cs := NewCipherSuite(DH25519, CipherAESGCM, HashStribog256)
+	cs := NewCipherSuite(DH25519, CipherKuznechik, HashStribog256)
 	rng := new(RandomInc)
 	staticR, _ := cs.GenerateKeypair(rng)
 	hs, _ := NewHandshakeState(Config{
@@ -36,7 +36,7 @@ func (NoiseSuite) TestN(c *C) {
 	})
 
 	hello, _, _, _ := hs.WriteMessage(nil, nil)
-	expected, _ := hex.DecodeString("358072d6365880d1aeea329adf9121383851ed21a28e3b75e965d0d2cd16625400dd179040f205cdcb945ab272ec1302")
+	expected, _ := hex.DecodeString("358072d6365880d1aeea329adf9121383851ed21a28e3b75e965d0d2cd166254c1179a4e12137cbab72eb0ed29b7008b")
 	c.Assert(hello, DeepEquals, expected)
 }
 
