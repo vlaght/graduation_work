@@ -14,6 +14,8 @@ import (
 	"golang.org/x/crypto/blake2s"
 	"golang.org/x/crypto/chacha20poly1305"
 	"golang.org/x/crypto/curve25519"
+
+	"cypherpunks.ru/gogost/gost34112012"
 )
 
 // A DHKey is a keypair used for Diffie-Hellman key agreement.
@@ -60,7 +62,7 @@ type CipherFunc interface {
 // A Cipher is a AEAD cipher that has been initialized with a key.
 type Cipher interface {
 	// Encrypt encrypts the provided plaintext with a nonce and then appends the
-	// ciphertext to out along with an authentication tag over the ciphertext
+	// ciphertext to out along 	with an authentication tag over the ciphertext
 	// and optional authenticated data.
 	Encrypt(out []byte, n uint64, ad, plaintext []byte) []byte
 
@@ -223,3 +225,19 @@ func blake2sNew() hash.Hash {
 
 // HashBLAKE2s is the BLAKE2s hash function.
 var HashBLAKE2s HashFunc = hashFn{blake2sNew, "BLAKE2s"}
+
+func stribog256New() hash.Hash {
+	h := gost34112012.New(256)
+	return h
+}
+
+// Stribog256 is the gost34112012256 hash function.
+var HashStribog256 HashFunc = hashFn{stribog256New, "STRIBOG256"}
+
+func stribog512New() hash.Hash {
+	h := gost34112012.New(512)
+	return h
+}
+
+// Stribog512 is the gost34112012512 hash function.
+var HashStribog512 HashFunc = hashFn{stribog512New, "STRIBOG512"}
