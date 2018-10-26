@@ -1,4 +1,4 @@
-# Go noise with GOST
+# noise with GOST
 
 This is a clone of Go package that implements the [Noise Protocol
 Framework](https://noiseprotocol.org). See [the
