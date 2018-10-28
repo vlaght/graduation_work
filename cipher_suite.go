@@ -1,4 +1,4 @@
-package noise
+package noise_gost
 
 import (
 	"crypto/aes"
@@ -182,8 +182,6 @@ func Gost34122015(k [32]byte) Cipher {
 		},
 	}
 }
-
-
 
 // CipherChaChaPoly is the ChaCha20-Poly1305 AEAD cipher construction.
 var CipherChaChaPoly CipherFunc = cipherFn{cipherChaChaPoly, "ChaChaPoly"}

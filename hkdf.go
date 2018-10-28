@@ -1,4 +1,4 @@
-package noise
+package noise_gost
 
 import (
 	"crypto/hmac"

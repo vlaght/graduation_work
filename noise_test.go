@@ -1,4 +1,4 @@
-package noise
+package noise_gost
 
 import (
 	"encoding/hex"
@@ -308,7 +308,7 @@ func (NoiseSuite) Test_Npsk0(c *C) {
 
 	msg, _, _, _ := hsI.WriteMessage(nil, nil)
 	c.Assert(msg, HasLen, 48)
-	
+
 	expected, _ := hex.DecodeString("358072d6365880d1aeea329adf9121383851ed21a28e3b75e965d0d2cd1662543cff577e31f7a9e2ffcfcfd5c6006bb1")
 	c.Assert(msg, DeepEquals, expected)
 }
