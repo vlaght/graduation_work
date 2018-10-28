@@ -1,4 +1,4 @@
-package noise_gost
+package noisegost
 
 import (
 	"bufio"

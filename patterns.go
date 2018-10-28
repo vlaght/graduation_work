@@ -1,4 +1,4 @@
-package noise_gost
+package noisegost
 
 var HandshakeNN = HandshakePattern{
 	Name: "NN",
