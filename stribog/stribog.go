@@ -16,7 +16,7 @@
 
 // GOST R 34.11-2012 hash function.
 // RFC 6986.
-package gost34112012
+package stribog
 
 import (
 	"encoding/binary"

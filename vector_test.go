@@ -27,14 +27,17 @@ func hexReader(s []byte) io.Reader {
 
 var patterns = make(map[string]HandshakePattern)
 var ciphers = map[string]CipherFunc{
-	"AESGCM":     CipherAESGCM,
-	"ChaChaPoly": CipherChaChaPoly,
+	"AESGCM":       CipherAESGCM,
+	"ChaChaPoly":   CipherChaChaPoly,
+	"KuznechikGCM": CipherKuznechik,
 }
 var hashes = map[string]HashFunc{
-	"SHA256":  HashSHA256,
-	"SHA512":  HashSHA512,
-	"BLAKE2b": HashBLAKE2b,
-	"BLAKE2s": HashBLAKE2s,
+	"SHA256":     HashSHA256,
+	"SHA512":     HashSHA512,
+	"BLAKE2b":    HashBLAKE2b,
+	"BLAKE2s":    HashBLAKE2s,
+	"Stribog256": HashStribog256,
+	"Stribog512": HashStribog512,
 }
 
 var patternKeys = make(map[string]patternKeyInfo)

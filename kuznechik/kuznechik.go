@@ -54,13 +54,13 @@ package kuznechik
 // We use unsafe for type conversions in fast 64-bit XOR implementation.
 // Note: platform dependent.
 import (
-	"unsafe"
 	"crypto/cipher"
 	"strconv"
+	"unsafe"
 )
 
 // Flag to indicate that cipher lookup tables are ready.
-var CipherInitialized = false;
+var CipherInitialized = false
 
 // 128-bit block cipher.
 // Defined as a constant here, but most of code below use hardcoded plain 16.
@@ -68,7 +68,7 @@ const BlockSize = 16
 
 // Pi (S) substitution lookup table.
 // Pi is a main substitution defined for Kuznyechik cipher.
-var Pi_table = [256]uint8 {
+var Pi_table = [256]uint8{
 
 	0xFC, 0xEE, 0xDD, 0x11, 0xCF, 0x6E, 0x31, 0x16,
 	0xFB, 0xC4, 0xFA, 0xDA, 0x23, 0xC5, 0x04, 0x4D,
@@ -102,11 +102,10 @@ var Pi_table = [256]uint8 {
 	0xCB, 0x9B, 0x25, 0xD0, 0xBE, 0xE5, 0x6C, 0x52,
 	0x59, 0xA6, 0x74, 0xD2, 0xE6, 0xF4, 0xB4, 0xC0,
 	0xD1, 0x66, 0xAF, 0xC2, 0x39, 0x4B, 0x63, 0xB6,
-
 }
 
 // Inverse Pi (S) substitution lookup table.
-var Pi_inverse_table = [256]uint8 {
+var Pi_inverse_table = [256]uint8{
 
 	0xA5, 0x2D, 0x32, 0x8F, 0x0E, 0x30, 0x38, 0xC0,
 	0x54, 0xE6, 0x9E, 0x39, 0x55, 0x7E, 0x52, 0x91,
@@ -140,10 +139,10 @@ var Pi_inverse_table = [256]uint8 {
 	0x99, 0x10, 0x44, 0x40, 0x92, 0x3A, 0x01, 0x26,
 	0x12, 0x1A, 0x48, 0x68, 0xF5, 0x81, 0x8B, 0xC7,
 	0xD6, 0x20, 0x0A, 0x08, 0x00, 0x4C, 0xD7, 0x74,
-
 }
+
 // L-function (transformation) vector.
-var L_vector = [16]uint8 { 0x94, 0x20, 0x85, 0x10, 0xC2, 0xC0, 0x01, 0xFB,	0x01, 0xC0, 0xC2, 0x10, 0x85, 0x20, 0x94, 0x01 }
+var L_vector = [16]uint8{0x94, 0x20, 0x85, 0x10, 0xC2, 0xC0, 0x01, 0xFB, 0x01, 0xC0, 0xC2, 0x10, 0x85, 0x20, 0x94, 0x01}
 
 // Lookup table for precomputed encryption transformations (LS).
 var LS_enc_lookup [16][256][16]uint8
@@ -156,17 +155,19 @@ var SL_dec_lookup [16][256][16]uint8
 
 // Multiplication in GF(2^8) with P(x)=x^8+x^7+x^6+x+1.
 // Used by L-function.
-func GF2_mul(x,y uint8) uint8 {
+func GF2_mul(x, y uint8) uint8 {
 	var z uint8
 
 	z = 0
 	for y != 0 { // While we have any bits left.
-		if (y & 1 == 1) {	z = z ^ x	} // Add...
-		if (x & 0x80 != 0) {  				// and calculate residue.
-				x = (x << 1) ^ 0xC3
-				}	else {
-				x = x << 1
-				}
+		if y&1 == 1 {
+			z = z ^ x
+		} // Add...
+		if x&0x80 != 0 { // and calculate residue.
+			x = (x << 1) ^ 0xC3
+		} else {
+			x = x << 1
+		}
 		y = y >> 1 // Shift out processed term.
 	}
 
@@ -175,52 +176,52 @@ func GF2_mul(x,y uint8) uint8 {
 
 // L-function (linear transfromation).
 func L(block [16]uint8) [16]uint8 {
-// Takes 128-bit block and returns result of L-function.
-	var i,j int
+	// Takes 128-bit block and returns result of L-function.
+	var i, j int
 	var x uint8
 
-		for j = 0; j < 16; j++ { // 16 rounds of transformation R (LFSR).
-			// Single round of R.
-				x = block[15]
-				for i = 14; i >= 0 ; i-- {
-						block[i+1] = block[i]
-						// Multiplication and addition in GF.
-						x = x ^ GF2_mul(block[i],L_vector[i])
-				}
-				block[0] = x
+	for j = 0; j < 16; j++ { // 16 rounds of transformation R (LFSR).
+		// Single round of R.
+		x = block[15]
+		for i = 14; i >= 0; i-- {
+			block[i+1] = block[i]
+			// Multiplication and addition in GF.
+			x = x ^ GF2_mul(block[i], L_vector[i])
 		}
+		block[0] = x
+	}
 
 	return block
 }
 
 // Inverse of L-function.
 func L_inv(block [16]uint8) [16]uint8 {
-	var i,j int
+	var i, j int
 	var x uint8
 
 	for j = 0; j < 16; j++ {
-			x = block[0]
-			for i = 0; i < 15 ; i++ { // Just process in reverse sequence.
-					block[i] = block[i+1]
-					x = x ^ GF2_mul(block[i],L_vector[i])
-			}
-			block[15] = x
+		x = block[0]
+		for i = 0; i < 15; i++ { // Just process in reverse sequence.
+			block[i] = block[i+1]
+			x = x ^ GF2_mul(block[i], L_vector[i])
+		}
+		block[15] = x
 	}
 
-return block
+	return block
 }
 
 // Stretches main key (256 bits) to 10 round keys K_1...K_10 (128 bits each).
 // Feistel cipher essentially.
 func StretchKey(key [32]uint8) [10][16]uint8 {
-	var i,k int
-	var C,x,y,z [16]uint8
+	var i, k int
+	var C, x, y, z [16]uint8
 	var rkeys [10][16]uint8
 
-// First - split key to pair of subkeys (K_1 = x, K_2 = y).
+	// First - split key to pair of subkeys (K_1 = x, K_2 = y).
 	for i = 0; i < 16; i++ {
 		x[i] = key[i]
-		y[i] = key[i + 16]
+		y[i] = key[i+16]
 	}
 
 	rkeys[0] = x
@@ -228,24 +229,30 @@ func StretchKey(key [32]uint8) [10][16]uint8 {
 
 	for i = 1; i <= 32; i++ {
 
-			for k = range C { C[k] = 0 } // Compute C_i constants.
-			C[15] = uint8(i)
-			C = L(C)
+		for k = range C {
+			C[k] = 0
+		} // Compute C_i constants.
+		C[15] = uint8(i)
+		C = L(C)
 
-			// Compute sequence of round keys.
-			for k = range z { z[k] = Pi_table[(x[k] ^ C[k])] }
-			z = L(z)
-			for k = range z { z[k] = z[k] ^ y[k] }
+		// Compute sequence of round keys.
+		for k = range z {
+			z[k] = Pi_table[(x[k] ^ C[k])]
+		}
+		z = L(z)
+		for k = range z {
+			z[k] = z[k] ^ y[k]
+		}
 
-			y = x
-			x = z
+		y = x
+		x = z
 
-			if i % 8 == 0 { // Store each pair of round keys.
-					rkeys[(i >> 2)] = x
-					rkeys[(i >> 2)+1] = y
-								}
+		if i%8 == 0 { // Store each pair of round keys.
+			rkeys[(i >> 2)] = x
+			rkeys[(i>>2)+1] = y
+		}
 	}
-return rkeys
+	return rkeys
 }
 
 // For fast decryption (see Decrypt_K) round keys need to be L-inversed (except the
@@ -255,19 +262,21 @@ func GetDecryptRoundKeys(rkeys [10][16]uint8) [10][16]uint8 {
 	var rkeys_L [10][16]uint8
 
 	// Calculate inverse (L function) of 9 round keys K_2..K_10.
-	for k := 1; k < 10; k++ { rkeys_L[k] = L_inv(rkeys[k]) }
+	for k := 1; k < 10; k++ {
+		rkeys_L[k] = L_inv(rkeys[k])
+	}
 	rkeys_L[0] = rkeys[0]
 	return rkeys_L
 }
 
 // Encrypts block with Encrypt_K using given 256-bit key.
-func Encrypt(key [32]uint8, block [16]uint8) [16]uint8  {
-// Takes key and block of plain text, returns cipher text.
+func Encrypt(key [32]uint8, block [16]uint8) [16]uint8 {
+	// Takes key and block of plain text, returns cipher text.
 	var ct [16]uint8
 	// 10 round keys.
 	var rkeys [10][16]uint8
 
-	if(!CipherInitialized){
+	if !CipherInitialized {
 		InitCipher()
 	}
 
@@ -275,74 +284,86 @@ func Encrypt(key [32]uint8, block [16]uint8) [16]uint8  {
 
 	ct = Encrypt_K(rkeys, block) // Call actual encryption procedure.
 
-	return ct		// Cipher text.
+	return ct // Cipher text.
 }
 
 // Encrypts block with given round keys set.
 // In routine encryption this is considerably faster, as Decrypt_K avoids
 // calling key expansion code every time it starts.
 func Encrypt_K(rkeys [10][16]uint8, block [16]uint8) [16]uint8 {
-// Takes round keys in rkyes and block of plain text, returns cipher text.
-	var i,j,k int
-	var ct,r [16]uint8
+	// Takes round keys in rkyes and block of plain text, returns cipher text.
+	var i, j, k int
+	var ct, r [16]uint8
 
 	ct = block
 	// Encryption process follows.
-		for i = 0; i < 9; i++ { // We have nine basic rounds.
-			// XOR with current round key. Using unsafe construction with pointers to process uint8 arrays as two 64-bit integers.
-			*(*uint64)(unsafe.Pointer(&ct[0])) = *(*uint64)(unsafe.Pointer(&ct[0])) ^ *(*uint64)(unsafe.Pointer(&rkeys[i][0]))
-			*(*uint64)(unsafe.Pointer(&ct[8])) = *(*uint64)(unsafe.Pointer(&ct[8])) ^ *(*uint64)(unsafe.Pointer(&rkeys[i][8]))
+	for i = 0; i < 9; i++ { // We have nine basic rounds.
+		// XOR with current round key. Using unsafe construction with pointers to process uint8 arrays as two 64-bit integers.
+		*(*uint64)(unsafe.Pointer(&ct[0])) = *(*uint64)(unsafe.Pointer(&ct[0])) ^ *(*uint64)(unsafe.Pointer(&rkeys[i][0]))
+		*(*uint64)(unsafe.Pointer(&ct[8])) = *(*uint64)(unsafe.Pointer(&ct[8])) ^ *(*uint64)(unsafe.Pointer(&rkeys[i][8]))
 
-			for k = range r { r[k] =  LS_enc_lookup[0][ct[0]][k]}		// Prepare for lookup.
-			for j = 1; j <= 15; j++ {																// There are 15 values from lookup table to XOR.
-				// Calculate XOR with lookup table elements. Each element corresponds
-				// to particular value of byte at current block position (ct[j]).
-				*(*uint64)(unsafe.Pointer(&r[0])) = *(*uint64)(unsafe.Pointer(&r[0])) ^ *(*uint64)(unsafe.Pointer(&LS_enc_lookup[j][ct[j]][0]))
-				*(*uint64)(unsafe.Pointer(&r[8])) = *(*uint64)(unsafe.Pointer(&r[8])) ^ *(*uint64)(unsafe.Pointer(&LS_enc_lookup[j][ct[j]][8]))
+		for k = range r {
+			r[k] = LS_enc_lookup[0][ct[0]][k]
+		} // Prepare for lookup.
+		for j = 1; j <= 15; j++ { // There are 15 values from lookup table to XOR.
+			// Calculate XOR with lookup table elements. Each element corresponds
+			// to particular value of byte at current block position (ct[j]).
+			*(*uint64)(unsafe.Pointer(&r[0])) = *(*uint64)(unsafe.Pointer(&r[0])) ^ *(*uint64)(unsafe.Pointer(&LS_enc_lookup[j][ct[j]][0]))
+			*(*uint64)(unsafe.Pointer(&r[8])) = *(*uint64)(unsafe.Pointer(&r[8])) ^ *(*uint64)(unsafe.Pointer(&LS_enc_lookup[j][ct[j]][8]))
 
-				}
-			ct = r
-			}
+		}
+		ct = r
+	}
 
-			*(*uint64)(unsafe.Pointer(&ct[0])) = *(*uint64)(unsafe.Pointer(&ct[0])) ^ *(*uint64)(unsafe.Pointer(&rkeys[9][0]))
-			*(*uint64)(unsafe.Pointer(&ct[8])) = *(*uint64)(unsafe.Pointer(&ct[8])) ^ *(*uint64)(unsafe.Pointer(&rkeys[9][8]))
+	*(*uint64)(unsafe.Pointer(&ct[0])) = *(*uint64)(unsafe.Pointer(&ct[0])) ^ *(*uint64)(unsafe.Pointer(&rkeys[9][0]))
+	*(*uint64)(unsafe.Pointer(&ct[8])) = *(*uint64)(unsafe.Pointer(&ct[8])) ^ *(*uint64)(unsafe.Pointer(&rkeys[9][8]))
 
-	return ct		// Cipher text.
+	return ct // Cipher text.
 
 }
 
 // Decrypts block using given key. Variant with L-lookup table only.
 // This variant may be used to conserve memory in some applications.
 // Unoptimized.
-func Decrypt_L(key [32]uint8, block [16]uint8) [16]uint8  {
-// Decrypt_L() works in reverse order compared to Encrypt().
-	var i,j,k int
-	var pt,r [16]uint8
+func Decrypt_L(key [32]uint8, block [16]uint8) [16]uint8 {
+	// Decrypt_L() works in reverse order compared to Encrypt().
+	var i, j, k int
+	var pt, r [16]uint8
 	var rkeys [10][16]uint8
 
 	rkeys = StretchKey(key) // Get round keys (no inversion).
 	pt = block
 
-  for i=9; i > 0; i-- { // We have nine rounds here; start from K_10.
-		for k = range pt { pt[k] = pt[k] ^ rkeys[i][k] } // XOR with current round key.
+	for i = 9; i > 0; i-- { // We have nine rounds here; start from K_10.
+		for k = range pt {
+			pt[k] = pt[k] ^ rkeys[i][k]
+		} // XOR with current round key.
 
-		for k = range r { r[k] =  L_inv_lookup[0][pt[0]][k] } // Prepare for inverse L lookup.
+		for k = range r {
+			r[k] = L_inv_lookup[0][pt[0]][k]
+		} // Prepare for inverse L lookup.
 		for j = 1; j <= 15; j++ {
-			for k = range r { r[k] = r[k] ^ L_inv_lookup[j][pt[j]][k] } // L lookup.
-			}
+			for k = range r {
+				r[k] = r[k] ^ L_inv_lookup[j][pt[j]][k]
+			} // L lookup.
+		}
 		pt = r // Make r the current block state.
-		for k = range pt { pt[k] = Pi_inverse_table[pt[k]] } // Apply inverse S (Pi).
+		for k = range pt {
+			pt[k] = Pi_inverse_table[pt[k]]
+		} // Apply inverse S (Pi).
 	}
-	for k = range pt { pt[k] = pt[k] ^ rkeys[0][k] } // XOR with final round key.
-	return pt  // Plain text.
+	for k = range pt {
+		pt[k] = pt[k] ^ rkeys[0][k]
+	} // XOR with final round key.
+	return pt // Plain text.
 }
 
 // "Standard" decrypt function with full in-memory precomputation.
-func Decrypt(key [32]uint8, block [16]uint8) [16]uint8  {
-// Takes key, returns plain text (possibly).
+func Decrypt(key [32]uint8, block [16]uint8) [16]uint8 {
+	// Takes key, returns plain text (possibly).
 	var rkeys [10][16]uint8
 
-	if(!CipherInitialized){
+	if !CipherInitialized {
 		InitCipher()
 	}
 
@@ -354,83 +375,95 @@ func Decrypt(key [32]uint8, block [16]uint8) [16]uint8  {
 // Decrypt block with round keys set. As corresponding Encrypt_K works much
 // faster on routine decryption (see above).
 func Decrypt_K(rkeys [10][16]uint8, block [16]uint8) [16]uint8 {
-// Takes round keys set. Round keys K_1..K_10 must be inversed with L_inv (K_0
-// remains intact).
-	var i,j,k int
-	var pt,r [16]uint8
+	// Takes round keys set. Round keys K_1..K_10 must be inversed with L_inv (K_0
+	// remains intact).
+	var i, j, k int
+	var pt, r [16]uint8
 
-		pt = block
-		// First - apply inverse L using lookup table.
-		for k = range r { r[k] = L_inv_lookup[0][pt[0]][k] }
+	pt = block
+	// First - apply inverse L using lookup table.
+	for k = range r {
+		r[k] = L_inv_lookup[0][pt[0]][k]
+	}
+	for j = 1; j <= 15; j++ {
+		*(*uint64)(unsafe.Pointer(&r[0])) = *(*uint64)(unsafe.Pointer(&r[0])) ^ *(*uint64)(unsafe.Pointer(&L_inv_lookup[j][pt[j]][0]))
+		*(*uint64)(unsafe.Pointer(&r[8])) = *(*uint64)(unsafe.Pointer(&r[8])) ^ *(*uint64)(unsafe.Pointer(&L_inv_lookup[j][pt[j]][8]))
+	}
+	pt = r
+
+	for i = 9; i > 1; i-- {
+		// XOR with current round key (inversed).
+		*(*uint64)(unsafe.Pointer(&pt[0])) = *(*uint64)(unsafe.Pointer(&pt[0])) ^ *(*uint64)(unsafe.Pointer(&rkeys[i][0]))
+		*(*uint64)(unsafe.Pointer(&pt[8])) = *(*uint64)(unsafe.Pointer(&pt[8])) ^ *(*uint64)(unsafe.Pointer(&rkeys[i][8]))
+
+		// Apply SL transformations using lookup table.
+		for k = range r {
+			r[k] = SL_dec_lookup[0][pt[0]][k]
+		}
 		for j = 1; j <= 15; j++ {
-			*(*uint64)(unsafe.Pointer(&r[0])) = *(*uint64)(unsafe.Pointer(&r[0])) ^ *(*uint64)(unsafe.Pointer(&L_inv_lookup[j][pt[j]][0]))
-			*(*uint64)(unsafe.Pointer(&r[8])) = *(*uint64)(unsafe.Pointer(&r[8])) ^ *(*uint64)(unsafe.Pointer(&L_inv_lookup[j][pt[j]][8]))
+			*(*uint64)(unsafe.Pointer(&r[0])) = *(*uint64)(unsafe.Pointer(&r[0])) ^ *(*uint64)(unsafe.Pointer(&SL_dec_lookup[j][pt[j]][0]))
+			*(*uint64)(unsafe.Pointer(&r[8])) = *(*uint64)(unsafe.Pointer(&r[8])) ^ *(*uint64)(unsafe.Pointer(&SL_dec_lookup[j][pt[j]][8]))
 		}
 		pt = r
+	}
 
-		for i = 9; i > 1; i-- {
-				// XOR with current round key (inversed).
-				*(*uint64)(unsafe.Pointer(&pt[0])) = *(*uint64)(unsafe.Pointer(&pt[0])) ^ *(*uint64)(unsafe.Pointer(&rkeys[i][0]))
-				*(*uint64)(unsafe.Pointer(&pt[8])) = *(*uint64)(unsafe.Pointer(&pt[8])) ^ *(*uint64)(unsafe.Pointer(&rkeys[i][8]))
+	//for k = range pt {
+	//		pt[k] = pt[k] ^ rkeys[1][k]			// XOR with K_2
+	//		pt[k] = Pi_inverse_table[pt[k]]	// Inverse Pi
+	//		pt[k] = pt[k] ^ rkeys[0][k]			// XOR with K_1
+	//}
 
-				// Apply SL transformations using lookup table.
-				for k = range r { r[k] = SL_dec_lookup[0][pt[0]][k] }
-				for j = 1; j <= 15; j++ {
-					*(*uint64)(unsafe.Pointer(&r[0])) = *(*uint64)(unsafe.Pointer(&r[0])) ^ *(*uint64)(unsafe.Pointer(&SL_dec_lookup[j][pt[j]][0]))
-					*(*uint64)(unsafe.Pointer(&r[8])) = *(*uint64)(unsafe.Pointer(&r[8])) ^ *(*uint64)(unsafe.Pointer(&SL_dec_lookup[j][pt[j]][8]))
-					}
-				pt = r
-				}
+	*(*uint64)(unsafe.Pointer(&pt[0])) = *(*uint64)(unsafe.Pointer(&pt[0])) ^ *(*uint64)(unsafe.Pointer(&rkeys[1][0]))
+	*(*uint64)(unsafe.Pointer(&pt[8])) = *(*uint64)(unsafe.Pointer(&pt[8])) ^ *(*uint64)(unsafe.Pointer(&rkeys[1][8]))
 
-		//for k = range pt {
-		//		pt[k] = pt[k] ^ rkeys[1][k]			// XOR with K_2
-		//		pt[k] = Pi_inverse_table[pt[k]]	// Inverse Pi
-		//		pt[k] = pt[k] ^ rkeys[0][k]			// XOR with K_1
-		//}
+	for k = range pt {
+		pt[k] = Pi_inverse_table[pt[k]]
+	}
 
-		*(*uint64)(unsafe.Pointer(&pt[0])) = *(*uint64)(unsafe.Pointer(&pt[0])) ^ *(*uint64)(unsafe.Pointer(&rkeys[1][0]))
-		*(*uint64)(unsafe.Pointer(&pt[8])) = *(*uint64)(unsafe.Pointer(&pt[8])) ^ *(*uint64)(unsafe.Pointer(&rkeys[1][8]))
+	*(*uint64)(unsafe.Pointer(&pt[0])) = *(*uint64)(unsafe.Pointer(&pt[0])) ^ *(*uint64)(unsafe.Pointer(&rkeys[0][0]))
+	*(*uint64)(unsafe.Pointer(&pt[8])) = *(*uint64)(unsafe.Pointer(&pt[8])) ^ *(*uint64)(unsafe.Pointer(&rkeys[0][8]))
 
-		for k = range pt { pt[k] = Pi_inverse_table[pt[k]] }
-
-		*(*uint64)(unsafe.Pointer(&pt[0])) = *(*uint64)(unsafe.Pointer(&pt[0])) ^ *(*uint64)(unsafe.Pointer(&rkeys[0][0]))
-		*(*uint64)(unsafe.Pointer(&pt[8])) = *(*uint64)(unsafe.Pointer(&pt[8])) ^ *(*uint64)(unsafe.Pointer(&rkeys[0][8]))
-
-		return pt // Plain text.
+	return pt // Plain text.
 }
 
 // Creates lookup tables for cipher runtime.
-func InitCipher()  {
-	var i,j,k int
+func InitCipher() {
+	var i, j, k int
 	var x [16]uint8
 
-	if(CipherInitialized){
+	if CipherInitialized {
 		return
 	}
 
 	for i = 0; i < 16; i++ { // 16 bytes.
 		for j = 0; j < 256; j++ { // 256 possible values of bytes - used as index.
 
-				for k = range x { x[k] = 0 }
-				x[i] = Pi_table[j]
-				x = L(x)
-				// This is LS lookup table, indexed by byte values.
-				// LS transformation (S, then L) used in encryption.
-				LS_enc_lookup[i][j] = x
-
-				for k = range x { x[k] = 0 }
-				x[i] = uint8(j)
-				x = L_inv(x)
-				// Inverse L lookup.
-				L_inv_lookup[i][j] = x
-
-				for k = range x { x[k] = 0 }
-				x[i] = Pi_inverse_table[j]
-				x = L_inv(x)
-				// SL inverse transformation used in decryption.
-				SL_dec_lookup[i][j] = x
-
+			for k = range x {
+				x[k] = 0
 			}
+			x[i] = Pi_table[j]
+			x = L(x)
+			// This is LS lookup table, indexed by byte values.
+			// LS transformation (S, then L) used in encryption.
+			LS_enc_lookup[i][j] = x
+
+			for k = range x {
+				x[k] = 0
+			}
+			x[i] = uint8(j)
+			x = L_inv(x)
+			// Inverse L lookup.
+			L_inv_lookup[i][j] = x
+
+			for k = range x {
+				x[k] = 0
+			}
+			x[i] = Pi_inverse_table[j]
+			x = L_inv(x)
+			// SL inverse transformation used in decryption.
+			SL_dec_lookup[i][j] = x
+
+		}
 	}
 	CipherInitialized = true
 	return
@@ -447,6 +480,7 @@ type kuznecCipher struct {
 
 // Standard error-info construction (from crypto/aes)
 type KeySizeError int
+
 func (k KeySizeError) Error() string {
 	return "Kuznyechik cipher: invalid key size! Must be 32 bytes - got: " + strconv.Itoa(int(k))
 }
@@ -455,20 +489,20 @@ func (k KeySizeError) Error() string {
 // While using with crypto/cipher we need to create cipher.Block to pass as
 // block cipher to GCM mode routines (see test_grasshoopper.go for examples).
 func NewCipher(key []byte) (cipher.Block, error) {
-var t_key [32]uint8 // Local copy of key.
+	var t_key [32]uint8 // Local copy of key.
 
 	if len(key) != 32 { // Only 256 bits!
 		return nil, KeySizeError(len(key))
 	}
 
 	c := *(new(kuznecCipher))
-	copy(t_key[:],key[:32])
+	copy(t_key[:], key[:32])
 	// Encryption and decryption round keys are somewhat different (see above).
 	c.enc_keys = StretchKey(t_key)
 	c.dec_keys = GetDecryptRoundKeys(c.enc_keys)
-	if(!CipherInitialized){
-						InitCipher() // Create lookup tables.
-					}
+	if !CipherInitialized {
+		InitCipher() // Create lookup tables.
+	}
 
 	return &c, nil
 }
@@ -480,7 +514,7 @@ func (c *kuznecCipher) BlockSize() int {
 
 // Encrypts given block src into dst with current round keys.
 func (c *kuznecCipher) Encrypt(dst, src []byte) {
-var ct_block [16]uint8
+	var ct_block [16]uint8
 
 	if len(src) < BlockSize {
 		panic("Kuznyechik cipher: input length less than full block!")
@@ -488,26 +522,26 @@ var ct_block [16]uint8
 	if len(dst) < BlockSize {
 		panic("Kuznyechik cipher: output length less than full block!")
 	}
-	copy(ct_block[:],src[:16])
+	copy(ct_block[:], src[:16])
 	// Encrypt_K should be used here.
 	ct_block = Encrypt_K(c.enc_keys, ct_block)
-	copy(dst,ct_block[:])
+	copy(dst, ct_block[:])
 
 }
 
 // Decrypts given block src into dst.
-func (c *kuznecCipher) Decrypt(dst, src []byte){
-var pt_block [16]uint8
+func (c *kuznecCipher) Decrypt(dst, src []byte) {
+	var pt_block [16]uint8
 
-		if len(src) < BlockSize {
-			panic("Kuznyechik cipher: input length less than full block!")
-		}
-		if len(dst) < BlockSize {
-			panic("Kuznyechik cipher: output length less than full block!")
-		}
+	if len(src) < BlockSize {
+		panic("Kuznyechik cipher: input length less than full block!")
+	}
+	if len(dst) < BlockSize {
+		panic("Kuznyechik cipher: output length less than full block!")
+	}
 
-	copy(pt_block[:],src[:16])
+	copy(pt_block[:], src[:16])
 	pt_block = Decrypt_K(c.dec_keys, pt_block)
-	copy(dst,pt_block[:])
+	copy(dst, pt_block[:])
 
 }

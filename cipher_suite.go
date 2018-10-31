@@ -15,9 +15,8 @@ import (
 	"golang.org/x/crypto/chacha20poly1305"
 	"golang.org/x/crypto/curve25519"
 
-	"cypherpunks.ru/gogost/gost34112012"
-
-	"kuznechik"
+	"./kuznechik"
+	"./stribog"
 )
 
 // A DHKey is a keypair used for Diffie-Hellman key agreement.
@@ -162,9 +161,9 @@ func cipherAESGCM(k [32]byte) Cipher {
 }
 
 // CipherKuznechik is the Kuznechik-GCM AEAD cipher.
-var CipherKuznechik CipherFunc = cipherFn{Gost34122015, "KuznechikGCM"}
+var CipherKuznechik CipherFunc = cipherFn{cipherGost34122015, "KuznechikGCM"}
 
-func Gost34122015(k [32]byte) Cipher {
+func cipherGost34122015(k [32]byte) Cipher {
 	c, err := kuznechik.NewCipher(k[:])
 	if err != nil {
 		panic(err)
@@ -251,17 +250,17 @@ func blake2sNew() hash.Hash {
 var HashBLAKE2s HashFunc = hashFn{blake2sNew, "BLAKE2s"}
 
 func stribog256New() hash.Hash {
-	h := gost34112012.New(256)
+	h := stribog.New(256)
 	return h
 }
 
-// Stribog256 is the gost34112012256 hash function.
+// HashStribog256 is the gost34112012256 hash function.
 var HashStribog256 HashFunc = hashFn{stribog256New, "STRIBOG256"}
 
 func stribog512New() hash.Hash {
-	h := gost34112012.New(512)
+	h := stribog.New(512)
 	return h
 }
 
-// Stribog512 is the gost34112012512 hash function.
+// HashStribog512 is the gost34112012512 hash function.
 var HashStribog512 HashFunc = hashFn{stribog512New, "STRIBOG512"}

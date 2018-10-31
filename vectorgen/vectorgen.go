@@ -7,12 +7,12 @@ import (
 	"io"
 	"os"
 
-	. "github.com/flynn/noise"
+	."github.com/vlaght/noisegost"
 )
 
 func main() {
-	for _, cipher := range []CipherFunc{CipherAESGCM, CipherChaChaPoly} {
-		for _, hash := range []HashFunc{HashSHA256, HashSHA512, HashBLAKE2b, HashBLAKE2s} {
+	for _, cipher := range []CipherFunc{CipherAESGCM, CipherChaChaPoly, CipherKuznechik} {
+		for _, hash := range []HashFunc{HashSHA256, HashSHA512, HashBLAKE2b, HashBLAKE2s, HashStribog256, HashStribog512} {
 			for _, handshake := range []HandshakePattern{
 				HandshakeNN,
 				HandshakeKN,
