@@ -21,7 +21,7 @@ func (r *RandomInc) Read(p []byte) (int, error) {
 }
 
 func main(){
- cs := noisegost.NewCipherSuite(noisegost.DH25519, noisegost.CipherKuznechik, noisegost.HashStreebog256)
+ 	cs := noisegost.NewCipherSuite(noisegost.DH25519, noisegost.CipherKuznechik, noisegost.HashStreebog256)
 	rngI := new(RandomInc)
 	rngR := new(RandomInc)
 
