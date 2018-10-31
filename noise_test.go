@@ -24,7 +24,7 @@ func (r *RandomInc) Read(p []byte) (int, error) {
 }
 
 func (NoiseSuite) TestN(c *C) {
-	cs := NewCipherSuite(DH25519, CipherKuznechik, HashStribog256)
+	cs := NewCipherSuite(DH25519, CipherKuznechik, HashStreebog256)
 	rng := new(RandomInc)
 	staticR, _ := cs.GenerateKeypair(rng)
 	hs, _ := NewHandshakeState(Config{
@@ -41,7 +41,7 @@ func (NoiseSuite) TestN(c *C) {
 }
 
 func (NoiseSuite) TestX(c *C) {
-	cs := NewCipherSuite(DH25519, CipherKuznechik, HashStribog256)
+	cs := NewCipherSuite(DH25519, CipherKuznechik, HashStreebog256)
 	rng := new(RandomInc)
 	staticI, _ := cs.GenerateKeypair(rng)
 	staticR, _ := cs.GenerateKeypair(rng)
@@ -60,7 +60,7 @@ func (NoiseSuite) TestX(c *C) {
 }
 
 func (NoiseSuite) TestNN(c *C) {
-	cs := NewCipherSuite(DH25519, CipherKuznechik, HashStribog256)
+	cs := NewCipherSuite(DH25519, CipherKuznechik, HashStreebog256)
 	rngI := new(RandomInc)
 	rngR := new(RandomInc)
 	*rngR = 1
@@ -95,7 +95,7 @@ func (NoiseSuite) TestNN(c *C) {
 }
 
 func (NoiseSuite) TestXX(c *C) {
-	cs := NewCipherSuite(DH25519, CipherKuznechik, HashStribog256)
+	cs := NewCipherSuite(DH25519, CipherKuznechik, HashStreebog256)
 	rngI := new(RandomInc)
 	rngR := new(RandomInc)
 	*rngR = 1
@@ -140,7 +140,7 @@ func (NoiseSuite) TestXX(c *C) {
 }
 
 func (NoiseSuite) TestIK(c *C) {
-	cs := NewCipherSuite(DH25519, CipherKuznechik, HashStribog256)
+	cs := NewCipherSuite(DH25519, CipherKuznechik, HashStreebog256)
 	rngI := new(RandomInc)
 	rngR := new(RandomInc)
 	*rngR = 1
@@ -246,7 +246,7 @@ func (NoiseSuite) TestXXRoundtrip(c *C) {
 }
 
 func (NoiseSuite) Test_NNpsk0_Roundtrip(c *C) {
-	cs := NewCipherSuite(DH25519, CipherKuznechik, HashStribog256)
+	cs := NewCipherSuite(DH25519, CipherKuznechik, HashStreebog256)
 	rngI := new(RandomInc)
 	rngR := new(RandomInc)
 	*rngR = 1
@@ -293,7 +293,7 @@ func (NoiseSuite) Test_NNpsk0_Roundtrip(c *C) {
 }
 
 func (NoiseSuite) Test_Npsk0(c *C) {
-	cs := NewCipherSuite(DH25519, CipherKuznechik, HashStribog256)
+	cs := NewCipherSuite(DH25519, CipherKuznechik, HashStreebog256)
 	rng := new(RandomInc)
 	staticR, _ := cs.GenerateKeypair(rng)
 
@@ -314,7 +314,7 @@ func (NoiseSuite) Test_Npsk0(c *C) {
 }
 
 func (NoiseSuite) Test_Xpsk0(c *C) {
-	cs := NewCipherSuite(DH25519, CipherKuznechik, HashStribog256)
+	cs := NewCipherSuite(DH25519, CipherKuznechik, HashStreebog256)
 	rng := new(RandomInc)
 	staticI, _ := cs.GenerateKeypair(rng)
 	staticR, _ := cs.GenerateKeypair(rng)
@@ -336,7 +336,7 @@ func (NoiseSuite) Test_Xpsk0(c *C) {
 }
 
 func (NoiseSuite) Test_NNpsk0(c *C) {
-	cs := NewCipherSuite(DH25519, CipherKuznechik, HashStribog256)
+	cs := NewCipherSuite(DH25519, CipherKuznechik, HashStreebog256)
 	rngI := new(RandomInc)
 	rngR := new(RandomInc)
 	*rngR = 1
@@ -376,7 +376,7 @@ func (NoiseSuite) Test_NNpsk0(c *C) {
 }
 
 func (NoiseSuite) Test_XXpsk0(c *C) {
-	cs := NewCipherSuite(DH25519, CipherKuznechik, HashStribog256)
+	cs := NewCipherSuite(DH25519, CipherKuznechik, HashStreebog256)
 	rngI := new(RandomInc)
 	rngR := new(RandomInc)
 	*rngR = 1
@@ -427,7 +427,7 @@ func (NoiseSuite) Test_XXpsk0(c *C) {
 }
 
 func (NoiseSuite) TestHandshakeRollback(c *C) {
-	cs := NewCipherSuite(DH25519, CipherKuznechik, HashStribog256)
+	cs := NewCipherSuite(DH25519, CipherKuznechik, HashStreebog256)
 	rngI := new(RandomInc)
 	rngR := new(RandomInc)
 	*rngR = 1
@@ -470,7 +470,7 @@ func (NoiseSuite) TestRekey(c *C) {
 
 	clientStaticKeypair, _ := DH25519.GenerateKeypair(rng)
 	clientConfig := Config{}
-	clientConfig.CipherSuite = NewCipherSuite(DH25519, CipherKuznechik, HashStribog256)
+	clientConfig.CipherSuite = NewCipherSuite(DH25519, CipherKuznechik, HashStreebog256)
 	clientConfig.Random = rng
 	clientConfig.Pattern = HandshakeNN
 	clientConfig.Initiator = true
@@ -481,7 +481,7 @@ func (NoiseSuite) TestRekey(c *C) {
 
 	serverStaticKeypair, _ := DH25519.GenerateKeypair(rng)
 	serverConfig := Config{}
-	serverConfig.CipherSuite = NewCipherSuite(DH25519, CipherKuznechik, HashStribog256)
+	serverConfig.CipherSuite = NewCipherSuite(DH25519, CipherKuznechik, HashStreebog256)
 	serverConfig.Random = rng
 	serverConfig.Pattern = HandshakeNN
 	serverConfig.Initiator = false

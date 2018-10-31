@@ -15,8 +15,8 @@ import (
 	"golang.org/x/crypto/chacha20poly1305"
 	"golang.org/x/crypto/curve25519"
 
-	"./kuznechik"
-	"./stribog"
+	"github.com/vlaght/kuznechik"
+	"github.com/vlaght/streebog"
 )
 
 // A DHKey is a keypair used for Diffie-Hellman key agreement.
@@ -249,18 +249,18 @@ func blake2sNew() hash.Hash {
 // HashBLAKE2s is the BLAKE2s hash function.
 var HashBLAKE2s HashFunc = hashFn{blake2sNew, "BLAKE2s"}
 
-func stribog256New() hash.Hash {
-	h := stribog.New(256)
+func streebog256New() hash.Hash {
+	h := streebog.New(256)
 	return h
 }
 
-// HashStribog256 is the gost34112012256 hash function.
-var HashStribog256 HashFunc = hashFn{stribog256New, "STRIBOG256"}
+// HashStreebog256 is the gost34112012256 hash function.
+var HashStreebog256 HashFunc = hashFn{streebog256New, "STREEBOG256"}
 
-func stribog512New() hash.Hash {
-	h := stribog.New(512)
+func streebog512New() hash.Hash {
+	h := streebog.New(512)
 	return h
 }
 
-// HashStribog512 is the gost34112012512 hash function.
-var HashStribog512 HashFunc = hashFn{stribog512New, "STRIBOG512"}
+// HashStreebog512 is the gost34112012512 hash function.
+var HashStreebog512 HashFunc = hashFn{streebog512New, "STREEBOG512"}
